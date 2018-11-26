@@ -1,0 +1,20 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.kid {
+  position: absolute;
+  background: pink;
+  cursor: pointer;
+  width: 10%;
+  height: 40%;
+  // opacity: .3;
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
