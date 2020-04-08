@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Head from '../components/head'
 import Layout from '../components/layout'
 import AwesomeThings from '../components/awesome-things'
-import style from './index.css'
+import style from './index.module.css'
 
 const Home = () => (
   <Layout>

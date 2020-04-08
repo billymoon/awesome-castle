@@ -1,99 +1,65 @@
-import firebase from "firebase/app";
-import "firebase/database";
+import sanity from '@sanity/client'
 import { useState, useEffect } from "react";
-
 import AwesomeJourney from "../components/awesome-journey";
-import style from './awesome-things.css'
-
-if (process.browser) {
-  window.firebase = firebase
-}
-
+import style from './awesome-things.module.css'
 export default () => {
-  const [place, setPlace] = useState({
-    mia: 0,
-    aria: 0,
-    fiona: 0
-  });
-
-  const kids = [
-    {
-      id: "mia",
-      name: "Mia Moon",
-      alias: "Little Miss Chatterbox",
-      place: place.mia
-    },
-    {
-      id: "aria",
-      name: "Aria Moon",
-      alias: "Little Miss Silly",
-      place: place.aria
-    },
-    {
-      id: "fiona",
-      name: "Fiona Moon",
-      alias: "Little Miss Wriggle",
-      place: place.fiona
-    }
-  ];
-
-  const offsets = [30, 11];
-
+  const [awesomeData, setAwesomeData] = useState(null)
+  const offsets = [30, 7];
   const positions = [
     [0, 0],
-    [-12, 7],
-    [-18, 14],
-    [-24, 21],
-    [-28, 28],
-    [-29, 35],
-    [-28, 42],
-    [-23, 49],
-    [-16, 56],
-    [-8, 63],
+    [-12, 4],
+    [-18, 9],
+    [-24, 14],
+    [-28, 19],
+    [-29, 25],
+    [-26, 30],
+    [-25, 35],
+    [-22, 40],
+    [-22, 45],
+    [-20, 49],
+    [-18, 54],
+    [-18, 59],
+    [-18, 65],
     [-6, 70]
   ];
-
   useEffect(() => {
-    const config = {
-      apiKey: "AIzaSyBWGE1ngJi8_n-L40UrZKb5oiQT6m2QhwQ",
-      authDomain: "awesome-castle.firebaseapp.com",
-      databaseURL: "https://awesome-castle.firebaseio.com",
-      projectId: "awesome-castle",
-      storageBucket: "awesome-castle.appspot.com",
-      messagingSenderId: "1074451816869"
-    }
-
-    if (!firebase.default.apps.length) {
-      firebase.initializeApp(config)
-    } else {
-      console.log(firebase.default.apps)
-    }
-
-    const database = firebase.database()
-
-    database.ref().on('value', function(snapshot) {
-      console.log(snapshot.val())
+    const client = sanity({
+      projectId: 'o254wohk',
+      dataset: 'production'
     })
+    client.fetch(`*[ _type == "kid" ] { name, position, "avatar": avatar.asset->url }`).then(data => {
+      const order = ['mia', 'aria', 'fiona']
+      setAwesomeData(data.sort((a, b) => order.indexOf(a.name) < order.indexOf(b.name) ? -1 : 1))
+    })
+    client.listen(`*[ _type == "kid" ] { name, position }`).subscribe(data => {
+      // const { name, position } = data.result
+      // alert(JSON.stringify({ name, position }))
+      // alert(JSON.stringify(data))
+      setAwesomeData(awesomeData => {
+        awesomeData.filter(({ name }) => name === data.result.name)[0].position = data.result.position
+        return [].concat(awesomeData)
+      })
+      // setPlace(place => ({ ...place, [name]: position }))
+    })
+    // client.listen(`*`).subscribe(data => alert(JSON.stringify(data)))
   }, [false])
-
   return (
     <div className={style.wrapper}>
       <AwesomeJourney />
-      <div>
-        {kids.map(kid => (
+      {awesomeData && <div>
+        {awesomeData.map(({ name, position, avatar }) => (
           <div
             className={style.kid}
-            key={kid.name}
-            onClick={() => setPlace({ ...place, [kid.id]: place[kid.id] + 1 })}
+            key={name}
             style={{
-              bottom: `${10 + offsets[0] + positions[place[kid.id]][0]}%`,
-              left: `${offsets[1] + positions[place[kid.id]][1]}%`
+              bottom: `${(name === 'mia' ? 10 : name === 'fiona' ? 2 : 5) + offsets[0] + positions[position][0]}%`,
+              left: `${offsets[1] + positions[position][1]}%`
             }}
           >
-            {kid.name}
+            <img src={`${avatar}?w=200`} style={{ width: '100%' }}/>
           </div>
         ))}
-      </div>
+      </div>}
     </div>
   );
 };
